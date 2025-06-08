@@ -729,26 +729,24 @@ class SafariServer {
     const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     const script = `
-      (function() {
-        const selector = '${escapedSelector}';
-        const element = document.querySelector(selector);
-        if (!element) {
-          return 'Element not found: ' + selector;
-        }
-        
-        // Scroll element into view
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Simulate click
-        const event = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        element.dispatchEvent(event);
-        
-        return 'Clicked on: ' + element.tagName + (element.className ? '.' + element.className : '') + (element.id ? '#' + element.id : '');
-      })()
+      const selector = '${escapedSelector}';
+      const element = document.querySelector(selector);
+      if (!element) {
+        return 'Element not found: ' + selector;
+      }
+      
+      // Scroll element into view
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Simulate click
+      const event = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true
+      });
+      element.dispatchEvent(event);
+      
+      return 'Clicked on: ' + element.tagName + (element.className ? '.' + element.className : '') + (element.id ? '#' + element.id : '');
     `;
     
     const result = await this.executeScript(script);
@@ -766,34 +764,32 @@ class SafariServer {
     const escapedText = text.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     const script = `
-      (function() {
-        const selector = '${escapedSelector}';
-        const element = document.querySelector(selector);
-        if (!element) {
-          return 'Element not found: ' + selector;
-        }
-        
-        // Focus the element
-        element.focus();
-        
-        // Clear if requested
-        if (${clearFirst}) {
-          element.value = '';
-        }
-        
-        // Type the text
-        element.value += '${escapedText}';
-        
-        // Trigger input event
-        const inputEvent = new Event('input', { bubbles: true });
-        element.dispatchEvent(inputEvent);
-        
-        // Trigger change event
-        const changeEvent = new Event('change', { bubbles: true });
-        element.dispatchEvent(changeEvent);
-        
-        return 'Typed text into: ' + element.tagName + (element.type ? '[type=' + element.type + ']' : '');
-      })()
+      const selector = '${escapedSelector}';
+      const element = document.querySelector(selector);
+      if (!element) {
+        return 'Element not found: ' + selector;
+      }
+      
+      // Focus the element
+      element.focus();
+      
+      // Clear if requested
+      if (${clearFirst}) {
+        element.value = '';
+      }
+      
+      // Type the text
+      element.value += '${escapedText}';
+      
+      // Trigger input event
+      const inputEvent = new Event('input', { bubbles: true });
+      element.dispatchEvent(inputEvent);
+      
+      // Trigger change event
+      const changeEvent = new Event('change', { bubbles: true });
+      element.dispatchEvent(changeEvent);
+      
+      return 'Typed text into: ' + element.tagName + (element.type ? '[type=' + element.type + ']' : '');
     `;
     
     return await this.executeScript(script);
@@ -805,32 +801,26 @@ class SafariServer {
     if (selector) {
       const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       script = `
-        (function() {
-          const selector = '${escapedSelector}';
-          const element = document.querySelector(selector);
-          if (!element) {
-            return 'Element not found: ' + selector;
-          }
-          element.scrollIntoView({ behavior: '${behavior}', block: 'center' });
-          return 'Scrolled to element: ' + selector;
-        })()
+        const selector = '${escapedSelector}';
+        const element = document.querySelector(selector);
+        if (!element) {
+          return 'Element not found: ' + selector;
+        }
+        element.scrollIntoView({ behavior: '${behavior}', block: 'center' });
+        return 'Scrolled to element: ' + selector;
       `;
     } else if (x !== undefined || y !== undefined) {
       script = `
-        (function() {
-          window.scrollTo({
-            left: ${x || 0},
-            top: ${y || 0},
-            behavior: '${behavior}'
-          });
-          return 'Scrolled to position: x=${x || 0}, y=${y || 0}';
-        })()
+        window.scrollTo({
+          left: ${x || 0},
+          top: ${y || 0},
+          behavior: '${behavior}'
+        });
+        return 'Scrolled to position: x=${x || 0}, y=${y || 0}';
       `;
     } else {
       script = `
-        (function() {
-          return 'No scroll target specified';
-        })()
+        return 'No scroll target specified';
       `;
     }
     
@@ -863,21 +853,19 @@ class SafariServer {
     }
     
     const script = `
-      (function() {
-        const selector = '${escapedSelector}';
-        const element = document.querySelector(selector);
-        if (!element || element.tagName !== 'SELECT') {
-          return 'Select element not found: ' + selector;
-        }
-        
-        ${selectScript}
-        
-        // Trigger change event
-        const changeEvent = new Event('change', { bubbles: true });
-        element.dispatchEvent(changeEvent);
-        
-        return 'Selected option in: ' + (element.name || element.id || selector);
-      })()
+      const selector = '${escapedSelector}';
+      const element = document.querySelector(selector);
+      if (!element || element.tagName !== 'SELECT') {
+        return 'Select element not found: ' + selector;
+      }
+      
+      ${selectScript}
+      
+      // Trigger change event
+      const changeEvent = new Event('change', { bubbles: true });
+      element.dispatchEvent(changeEvent);
+      
+      return 'Selected option in: ' + (element.name || element.id || selector);
     `;
     
     return await this.executeScript(script);
@@ -887,14 +875,12 @@ class SafariServer {
     const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     const script = `
-      (function() {
-        const selector = '${escapedSelector}';
-        const element = document.querySelector(selector);
-        if (!element) {
-          return 'Element not found: ' + selector;
-        }
-        return element.textContent || element.innerText || '';
-      })()
+      const selector = '${escapedSelector}';
+      const element = document.querySelector(selector);
+      if (!element) {
+        return 'Element not found: ' + selector;
+      }
+      return element.textContent || element.innerText || '';
     `;
     
     return await this.executeScript(script);
@@ -907,43 +893,42 @@ class SafariServer {
       // Use a different approach - pass the selector as a string literal
       const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       
+      // Don't use IIFE here - executeScript will wrap it
       const checkScript = `
-        (function() {
-          const selector = '${escapedSelector}';
-          const element = document.querySelector(selector);
-          if (!element) {
-            return JSON.stringify({ found: false, reason: 'Element not found' });
-          }
+        const selector = '${escapedSelector}';
+        const element = document.querySelector(selector);
+        if (!element) {
+          return JSON.stringify({ found: false, reason: 'Element not found' });
+        }
+        
+        if (${visible}) {
+          const rect = element.getBoundingClientRect();
+          const computedStyle = window.getComputedStyle(element);
+          const isHidden = computedStyle.display === 'none' || 
+                         computedStyle.visibility === 'hidden' || 
+                         computedStyle.opacity === '0';
+          const isInViewport = rect.width > 0 && rect.height > 0 && 
+                             rect.top < window.innerHeight && 
+                             rect.bottom > 0 &&
+                             rect.left < window.innerWidth &&
+                             rect.right > 0;
+          const isVisible = !isHidden && isInViewport;
           
-          if (${visible}) {
-            const rect = element.getBoundingClientRect();
-            const computedStyle = window.getComputedStyle(element);
-            const isHidden = computedStyle.display === 'none' || 
-                           computedStyle.visibility === 'hidden' || 
-                           computedStyle.opacity === '0';
-            const isInViewport = rect.width > 0 && rect.height > 0 && 
-                               rect.top < window.innerHeight && 
-                               rect.bottom > 0 &&
-                               rect.left < window.innerWidth &&
-                               rect.right > 0;
-            const isVisible = !isHidden && isInViewport;
-            
-            return JSON.stringify({ 
-              found: isVisible, 
-              reason: isVisible ? 'Element is visible' : 'Element exists but is not visible',
-              details: {
-                hidden: isHidden,
-                inViewport: isInViewport,
-                display: computedStyle.display,
-                visibility: computedStyle.visibility,
-                opacity: computedStyle.opacity,
-                rect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left }
-              }
-            });
-          }
-          
-          return JSON.stringify({ found: true, reason: 'Element exists' });
-        })()
+          return JSON.stringify({ 
+            found: isVisible, 
+            reason: isVisible ? 'Element is visible' : 'Element exists but is not visible',
+            details: {
+              hidden: isHidden,
+              inViewport: isInViewport,
+              display: computedStyle.display,
+              visibility: computedStyle.visibility,
+              opacity: computedStyle.opacity,
+              rect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left }
+            }
+          });
+        }
+        
+        return JSON.stringify({ found: true, reason: 'Element exists' });
       `;
       
       const result = await this.executeScript(checkScript);
@@ -973,19 +958,17 @@ class SafariServer {
     // One final check to provide better error message
     const finalEscapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     const finalCheckScript = `
-      (function() {
-        const selector = '${finalEscapedSelector}';
-        const element = document.querySelector(selector);
-        if (!element) {
-          return 'Element not found with selector: ' + selector;
-        } else {
-          const rect = element.getBoundingClientRect();
-          const computedStyle = window.getComputedStyle(element);
-          return 'Element exists but wait condition not met. Display: ' + computedStyle.display + 
-                 ', Visibility: ' + computedStyle.visibility + 
-                 ', Dimensions: ' + rect.width + 'x' + rect.height;
-        }
-      })()
+      const selector = '${finalEscapedSelector}';
+      const element = document.querySelector(selector);
+      if (!element) {
+        return 'Element not found with selector: ' + selector;
+      } else {
+        const rect = element.getBoundingClientRect();
+        const computedStyle = window.getComputedStyle(element);
+        return 'Element exists but wait condition not met. Display: ' + computedStyle.display + 
+               ', Visibility: ' + computedStyle.visibility + 
+               ', Dimensions: ' + rect.width + 'x' + rect.height;
+      }
     `;
     
     const finalResult = await this.executeScript(finalCheckScript);
