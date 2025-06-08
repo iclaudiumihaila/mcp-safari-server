@@ -88,7 +88,7 @@ class SafariServer {
     this.server = new Server(
       {
         name: 'mcp-safari-server',
-        version: '1.0.0',
+        version: '1.1.0', // Updated with quote escaping fixes
       },
       {
         capabilities: {
