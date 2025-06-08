@@ -1,5 +1,8 @@
 # MCP Safari Server
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Protocol](https://img.shields.io/badge/MCP-v0.5.0-blue)](https://modelcontextprotocol.io)
+
 A Model Context Protocol (MCP) server that provides programmatic control of Safari browser on macOS. Perfect for web automation, testing, and debugging with AI assistants like Claude.
 
 ## Overview
