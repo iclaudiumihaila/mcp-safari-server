@@ -686,7 +686,10 @@ class SafariServer {
   private async goBack() {
     const script = `
       tell application "Safari"
-        tell current tab of front window to go back
+        tell front window
+          set current tab to current tab
+          do JavaScript "history.back()" in current tab
+        end tell
       end tell
     `;
     
@@ -704,7 +707,10 @@ class SafariServer {
   private async goForward() {
     const script = `
       tell application "Safari"
-        tell current tab of front window to go forward
+        tell front window
+          set current tab to current tab
+          do JavaScript "history.forward()" in current tab
+        end tell
       end tell
     `;
     
@@ -723,7 +729,7 @@ class SafariServer {
     const escapedSelector = selector.replace(/"/g, '\\"');
     
     const script = `
-      function() {
+      (function() {
         const element = document.querySelector("${escapedSelector}");
         if (!element) {
           return 'Element not found: ${escapedSelector}';
@@ -741,7 +747,7 @@ class SafariServer {
         element.dispatchEvent(event);
         
         return 'Clicked on: ' + element.tagName + (element.className ? '.' + element.className : '') + (element.id ? '#' + element.id : '');
-      }
+      })()
     `;
     
     const result = await this.executeScript(script);
@@ -759,7 +765,7 @@ class SafariServer {
     const escapedText = text.replace(/"/g, '\\"').replace(/\n/g, '\\n');
     
     const script = `
-      function() {
+      (function() {
         const element = document.querySelector("${escapedSelector}");
         if (!element) {
           return 'Element not found: ${escapedSelector}';
@@ -785,7 +791,7 @@ class SafariServer {
         element.dispatchEvent(changeEvent);
         
         return 'Typed text into: ' + element.tagName + (element.type ? '[type=' + element.type + ']' : '');
-      }
+      })()
     `;
     
     return await this.executeScript(script);
@@ -797,31 +803,31 @@ class SafariServer {
     if (selector) {
       const escapedSelector = selector.replace(/"/g, '\\"');
       script = `
-        function() {
+        (function() {
           const element = document.querySelector("${escapedSelector}");
           if (!element) {
             return 'Element not found: ${escapedSelector}';
           }
           element.scrollIntoView({ behavior: '${behavior}', block: 'center' });
           return 'Scrolled to element: ${escapedSelector}';
-        }
+        })()
       `;
     } else if (x !== undefined || y !== undefined) {
       script = `
-        function() {
+        (function() {
           window.scrollTo({
             left: ${x || 0},
             top: ${y || 0},
             behavior: '${behavior}'
           });
           return 'Scrolled to position: x=${x || 0}, y=${y || 0}';
-        }
+        })()
       `;
     } else {
       script = `
-        function() {
+        (function() {
           return 'No scroll target specified';
-        }
+        })()
       `;
     }
     
@@ -853,7 +859,7 @@ class SafariServer {
     }
     
     const script = `
-      function() {
+      (function() {
         const element = document.querySelector("${escapedSelector}");
         if (!element || element.tagName !== 'SELECT') {
           return 'Select element not found: ${escapedSelector}';
@@ -865,8 +871,8 @@ class SafariServer {
         const changeEvent = new Event('change', { bubbles: true });
         element.dispatchEvent(changeEvent);
         
-        return 'Selected option in: ' + element.name || element.id || '${escapedSelector}';
-      }
+        return 'Selected option in: ' + (element.name || element.id || '${escapedSelector}');
+      })()
     `;
     
     return await this.executeScript(script);
@@ -876,13 +882,13 @@ class SafariServer {
     const escapedSelector = selector.replace(/"/g, '\\"');
     
     const script = `
-      function() {
+      (function() {
         const element = document.querySelector("${escapedSelector}");
         if (!element) {
           return 'Element not found: ${escapedSelector}';
         }
         return element.textContent || element.innerText || '';
-      }
+      })()
     `;
     
     return await this.executeScript(script);
@@ -894,7 +900,7 @@ class SafariServer {
     
     while (Date.now() - startTime < timeout) {
       const checkScript = `
-        function() {
+        (function() {
           const element = document.querySelector("${escapedSelector}");
           if (!element) return false;
           
@@ -907,7 +913,7 @@ class SafariServer {
           }
           
           return true;
-        }
+        })()
       `;
       
       const result = await this.executeScript(checkScript);
