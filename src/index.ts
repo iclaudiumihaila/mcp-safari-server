@@ -911,41 +911,88 @@ class SafariServer {
         (function() {
           const selector = '${escapedSelector}';
           const element = document.querySelector(selector);
-          if (!element) return false;
+          if (!element) {
+            return JSON.stringify({ found: false, reason: 'Element not found' });
+          }
           
           if (${visible}) {
             const rect = element.getBoundingClientRect();
-            const isVisible = rect.width > 0 && rect.height > 0 && 
-                            rect.top < window.innerHeight && 
-                            rect.bottom > 0;
-            return isVisible;
+            const computedStyle = window.getComputedStyle(element);
+            const isHidden = computedStyle.display === 'none' || 
+                           computedStyle.visibility === 'hidden' || 
+                           computedStyle.opacity === '0';
+            const isInViewport = rect.width > 0 && rect.height > 0 && 
+                               rect.top < window.innerHeight && 
+                               rect.bottom > 0 &&
+                               rect.left < window.innerWidth &&
+                               rect.right > 0;
+            const isVisible = !isHidden && isInViewport;
+            
+            return JSON.stringify({ 
+              found: isVisible, 
+              reason: isVisible ? 'Element is visible' : 'Element exists but is not visible',
+              details: {
+                hidden: isHidden,
+                inViewport: isInViewport,
+                display: computedStyle.display,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                rect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left }
+              }
+            });
           }
           
-          return true;
+          return JSON.stringify({ found: true, reason: 'Element exists' });
         })()
       `;
       
       const result = await this.executeScript(checkScript);
-      const found = result.content[0].text === 'true';
       
-      if (found) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Element found: ${selector}`,
-            },
-          ],
-        };
+      try {
+        const checkResult = JSON.parse(result.content[0].text);
+        
+        if (checkResult.found) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Element found: ${selector} (${checkResult.reason})`,
+              },
+            ],
+          };
+        }
+      } catch (e) {
+        // If we can't parse the result, continue waiting
+        console.error('Error parsing wait result:', e);
       }
       
       // Wait a bit before checking again
       await new Promise(resolve => setTimeout(resolve, 500));
     }
     
+    // One final check to provide better error message
+    const finalEscapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const finalCheckScript = `
+      (function() {
+        const selector = '${finalEscapedSelector}';
+        const element = document.querySelector(selector);
+        if (!element) {
+          return 'Element not found with selector: ' + selector;
+        } else {
+          const rect = element.getBoundingClientRect();
+          const computedStyle = window.getComputedStyle(element);
+          return 'Element exists but wait condition not met. Display: ' + computedStyle.display + 
+                 ', Visibility: ' + computedStyle.visibility + 
+                 ', Dimensions: ' + rect.width + 'x' + rect.height;
+        }
+      })()
+    `;
+    
+    const finalResult = await this.executeScript(finalCheckScript);
+    
     throw new McpError(
       ErrorCode.InternalError,
-      `Timeout waiting for element: ${selector}`
+      `Timeout waiting for element: ${selector}. ${finalResult.content[0].text}`
     );
   }
 
