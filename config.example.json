@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "safari": {
+      "command": "node",
+      "args": ["/path/to/mcp-safari-server/dist/index.js"],
+      "env": {
+        "SAFARI_AUTOMATION_MODE": "full",
+        "SKIP_PERMISSION_CHECKS": "true"
+      }
+    }
+  }
+}
