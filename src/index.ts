@@ -726,13 +726,14 @@ class SafariServer {
   }
 
   private async clickElement(selector: string, waitForNavigation: boolean = false) {
-    const escapedSelector = selector.replace(/"/g, '\\"');
+    const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     const script = `
       (function() {
-        const element = document.querySelector("${escapedSelector}");
+        const selector = '${escapedSelector}';
+        const element = document.querySelector(selector);
         if (!element) {
-          return 'Element not found: ${escapedSelector}';
+          return 'Element not found: ' + selector;
         }
         
         // Scroll element into view
@@ -761,14 +762,15 @@ class SafariServer {
   }
 
   private async typeText(selector: string, text: string, clearFirst: boolean = true) {
-    const escapedSelector = selector.replace(/"/g, '\\"');
-    const escapedText = text.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const escapedText = text.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     const script = `
       (function() {
-        const element = document.querySelector("${escapedSelector}");
+        const selector = '${escapedSelector}';
+        const element = document.querySelector(selector);
         if (!element) {
-          return 'Element not found: ${escapedSelector}';
+          return 'Element not found: ' + selector;
         }
         
         // Focus the element
@@ -780,7 +782,7 @@ class SafariServer {
         }
         
         // Type the text
-        element.value += "${escapedText}";
+        element.value += '${escapedText}';
         
         // Trigger input event
         const inputEvent = new Event('input', { bubbles: true });
@@ -801,15 +803,16 @@ class SafariServer {
     let script: string;
     
     if (selector) {
-      const escapedSelector = selector.replace(/"/g, '\\"');
+      const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       script = `
         (function() {
-          const element = document.querySelector("${escapedSelector}");
+          const selector = '${escapedSelector}';
+          const element = document.querySelector(selector);
           if (!element) {
-            return 'Element not found: ${escapedSelector}';
+            return 'Element not found: ' + selector;
           }
           element.scrollIntoView({ behavior: '${behavior}', block: 'center' });
-          return 'Scrolled to element: ${escapedSelector}';
+          return 'Scrolled to element: ' + selector;
         })()
       `;
     } else if (x !== undefined || y !== undefined) {
@@ -835,18 +838,19 @@ class SafariServer {
   }
 
   private async selectOption(selector: string, value?: string, text?: string, index?: number) {
-    const escapedSelector = selector.replace(/"/g, '\\"');
+    const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     let selectScript: string;
     
     if (value !== undefined) {
-      const escapedValue = value.replace(/"/g, '\\"');
-      selectScript = `element.value = "${escapedValue}";`;
+      const escapedValue = value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      selectScript = `element.value = '${escapedValue}';`;
     } else if (text !== undefined) {
-      const escapedText = text.replace(/"/g, '\\"');
+      const escapedText = text.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       selectScript = `
+        const targetText = '${escapedText}';
         for (let option of element.options) {
-          if (option.text === "${escapedText}") {
+          if (option.text === targetText) {
             element.value = option.value;
             break;
           }
@@ -860,9 +864,10 @@ class SafariServer {
     
     const script = `
       (function() {
-        const element = document.querySelector("${escapedSelector}");
+        const selector = '${escapedSelector}';
+        const element = document.querySelector(selector);
         if (!element || element.tagName !== 'SELECT') {
-          return 'Select element not found: ${escapedSelector}';
+          return 'Select element not found: ' + selector;
         }
         
         ${selectScript}
@@ -871,7 +876,7 @@ class SafariServer {
         const changeEvent = new Event('change', { bubbles: true });
         element.dispatchEvent(changeEvent);
         
-        return 'Selected option in: ' + (element.name || element.id || '${escapedSelector}');
+        return 'Selected option in: ' + (element.name || element.id || selector);
       })()
     `;
     
@@ -879,13 +884,14 @@ class SafariServer {
   }
 
   private async getElementText(selector: string) {
-    const escapedSelector = selector.replace(/"/g, '\\"');
+    const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     
     const script = `
       (function() {
-        const element = document.querySelector("${escapedSelector}");
+        const selector = '${escapedSelector}';
+        const element = document.querySelector(selector);
         if (!element) {
-          return 'Element not found: ${escapedSelector}';
+          return 'Element not found: ' + selector;
         }
         return element.textContent || element.innerText || '';
       })()
@@ -895,13 +901,16 @@ class SafariServer {
   }
 
   private async waitForElement(selector: string, timeout: number = 10000, visible: boolean = true) {
-    const escapedSelector = selector.replace(/"/g, '\\"');
     const startTime = Date.now();
     
     while (Date.now() - startTime < timeout) {
+      // Use a different approach - pass the selector as a string literal
+      const escapedSelector = selector.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      
       const checkScript = `
         (function() {
-          const element = document.querySelector("${escapedSelector}");
+          const selector = '${escapedSelector}';
+          const element = document.querySelector(selector);
           if (!element) return false;
           
           if (${visible}) {
