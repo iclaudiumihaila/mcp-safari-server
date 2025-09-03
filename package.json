@@ -1,5 +1,5 @@
 {
-  "name": "@iclaudiumihaila/mcp-safari-server",
+  "name": "mcp-safari-server-claude",
   "version": "1.0.0",
   "description": "MCP server for Safari browser control and debugging on macOS",
   "main": "dist/index.js",
